@@ -33,6 +33,11 @@ then
 
   systemctl start docker
   systemctl enable docker
+  
+  # setup docker so it can be run as vagrant user
+  groupadd docker
+  gpasswd -a vagrant docker
+  setfacl -m user:vagrant:rw /var/run/docker.sock
 else
   echo "already installed flag set : /home/vagrant/already-installed-flag"
 fi
