@@ -13,11 +13,12 @@ then
   yum -y install tree
   #echo "INSTALL unzip curl wget lsof"
   yum  -y install unzip curl wget lsof 
-  # install sysstat
-  #yum -y install sysstat
-  #systemctl start sysstat
-  #systemctl enable sysstat
+  yum -y install sysstat
+  systemctl start sysstat
+  systemctl enable sysstat
 
+  # initial cron
+  crontab /vagrant/root_cronjob_monitoring_sysstat.txt
 
   # setup environment variables and extra alias for postgres user
   # cat /vagrant/bashrc.append.txt >> /var/lib/pgsql/.bash_profile
