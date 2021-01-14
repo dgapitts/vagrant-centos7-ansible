@@ -113,4 +113,60 @@ This project is simple safe playground style to learn ainsible and docker
   For more examples and ideas, visit:
   https://docs.docker.com/get-started/
 
+### First ansible-playbook a few simple checks and operations
+
+My first ansible-playbook 
+
+  [vagrant@cent7ansi vagrant]$ cat first_ansible-playbook_display_file_test.yml
+  ---
+    - name: "Display content of file root_cronjob_monitoring_sysstat.txt"
+      hosts: localhost
+      tasks:
+      - name: ping test
+        ping:
+
+      - name: Get root_cronjob_monitoring_sysstat.txt contents
+        command: cat root_cronjob_monitoring_sysstat.txt chdir=/vagrant
+        register: command_output
+
+      - name: Print to console
+        debug:
+          msg: "{{command_output.stdout}}"
+
+      - name: "find files in /vagrant"
+        find:
+          paths: '/vagrant'
+
+
+NB the above took me some time to get write, the identation has to be perfect ;)
+
+Here is the output:
+
+  [vagrant@cent7ansi vagrant]$ ansible-playbook first_ansible-playbook_display_file_test.yml -v
+  Using /etc/ansible/ansible.cfg as config file
+  [WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
+
+  PLAY [Display content of file root_cronjob_monitoring_sysstat.txt] ********************************************************************************
+
+  TASK [Gathering Facts] ****************************************************************************************************************************
+  ok: [localhost]
+
+  TASK [ping test] **********************************************************************************************************************************
+  ok: [localhost] => {"changed": false, "ping": "pong"}
+
+  TASK [Get root_cronjob_monitoring_sysstat.txt contents] *******************************************************************************************
+  changed: [localhost] => {"changed": true, "cmd": ["cat", "root_cronjob_monitoring_sysstat.txt"], "delta": "0:00:00.007846", "end": "2021-01-14 00:17:24.397899", "rc": 0, "start": "2021-01-14 00:17:24.390053", "stderr": "", "stderr_lines": [], "stdout": "# run system activity accounting tool every 1 minutes\n*/1 * * * * /usr/lib64/sa/sa1 1 1\n# generate a daily summary of process accounting at 23:53\n53 23 * * * /usr/lib64/sa/sa2 -A", "stdout_lines": ["# run system activity accounting tool every 1 minutes", "*/1 * * * * /usr/lib64/sa/sa1 1 1", "# generate a daily summary of process accounting at 23:53", "53 23 * * * /usr/lib64/sa/sa2 -A"]}
+
+  TASK [Print to console] ***************************************************************************************************************************
+  ok: [localhost] => {
+      "msg": "# run system activity accounting tool every 1 minutes\n*/1 * * * * /usr/lib64/sa/sa1 1 1\n# generate a daily summary of process accounting at 23:53\n53 23 * * * /usr/lib64/sa/sa2 -A"
+  }
+
+  TASK [find files in /vagrant] *********************************************************************************************************************
+  ok: [localhost] => {"changed": false, "examined": 7, "files": [{"atime": 1610575837.3620062, "ctime": 1610575837.6780062, "dev": 64768, "gid": 1000, "gr_name": "vagrant", "inode": 67147322, "isblk": false, "ischr": false, "isdir": false, "isfifo": false, "isgid": false, "islnk": false, "isreg": true, "issock": false, "isuid": false, "mode": "0644", "mtime": 1610571400.0, "nlink": 1, "path": "/vagrant/LICENSE", "pw_name": "vagrant", "rgrp": true, "roth": true, "rusr": true, "size": 35149, "uid": 1000, "wgrp": false, "woth": false, "wusr": true, "xgrp": false, "xoth": false, "xusr": false}, {"atime": 1610575837.363006, "ctime": 1610575837.6780062, "dev": 64768, "gid": 1000, "gr_name": "vagrant", "inode": 67147323, "isblk": false, "ischr": false, "isdir": false, "isfifo": false, "isgid": false, "islnk": false, "isreg": true, "issock": false, "isuid": false, "mode": "0644", "mtime": 1610571400.0, "nlink": 1, "path": "/vagrant/Vagrantfile", "pw_name": "vagrant", "rgrp": true, "roth": true, "rusr": true, "size": 534, "uid": 1000, "wgrp": false, "woth": false, "wusr": true, "xgrp": false, "xoth": false, "xusr": false}, {"atime": 1610575837.363006, "ctime": 1610575837.6780062, "dev": 64768, "gid": 1000, "gr_name": "vagrant", "inode": 67147324, "isblk": false, "ischr": false, "isdir": false, "isfifo": false, "isgid": false, "islnk": false, "isreg": true, "issock": false, "isuid": false, "mode": "0644", "mtime": 1610575779.0, "nlink": 1, "path": "/vagrant/provision.sh", "pw_name": "vagrant", "rgrp": true, "roth": true, "rusr": true, "size": 1165, "uid": 1000, "wgrp": false, "woth": false, "wusr": true, "xgrp": false, "xoth": false, "xusr": false}, {"atime": 1610575876.0480063, "ctime": 1610575837.6780062, "dev": 64768, "gid": 1000, "gr_name": "vagrant", "inode": 67147325, "isblk": false, "ischr": false, "isdir": false, "isfifo": false, "isgid": false, "islnk": false, "isreg": true, "issock": false, "isuid": false, "mode": "0644", "mtime": 1610571664.0, "nlink": 1, "path": "/vagrant/root_cronjob_monitoring_sysstat.txt", "pw_name": "vagrant", "rgrp": true, "roth": true, "rusr": true, "size": 179, "uid": 1000, "wgrp": false, "woth": false, "wusr": true, "xgrp": false, "xoth": false, "xusr": false}, {"atime": 1610583380.515912, "ctime": 1610583378.5669067, "dev": 64768, "gid": 1000, "gr_name": "vagrant", "inode": 67579643, "isblk": false, "ischr": false, "isdir": false, "isfifo": false, "isgid": false, "islnk": false, "isreg": true, "issock": false, "isuid": false, "mode": "0664", "mtime": 1610583378.5549893, "nlink": 1, "path": "/vagrant/first_ansible-playbook_display_file_test.yml", "pw_name": "vagrant", "rgrp": true, "roth": true, "rusr": true, "size": 467, "uid": 1000, "wgrp": true, "woth": false, "wusr": true, "xgrp": false, "xoth": false, "xusr": false}], "matched": 5, "msg": ""}
+
+  PLAY RECAP ****************************************************************************************************************************************
+  localhost                  : ok=5    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+Note you need the -v (verbose) option to see the results of the find TASK
 
