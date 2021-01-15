@@ -31,6 +31,11 @@ then
   yum -y install ansible
   yum -y install docker
 
+  #  new YAML callback plugin (introduced with Ansible 2.5) https://www.jeffgeerling.com/blog/2018/use-ansibles-yaml-callback-plugin-better-cli-experience
+  echo 'stdout_callback = yaml' >> /etc/ansible/ansible.cfg
+  echo 'bin_ansible_callbacks = True' >> /etc/ansible/ansible.cfg
+
+
   systemctl start docker
   systemctl enable docker
   
