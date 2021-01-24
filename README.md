@@ -189,6 +189,171 @@ Note you need the -v (verbose) option to see the results of the find TASK
 
 
 
+
+## Second set of playbooks - demo parallel vs serial executions
+
+#### default behaviour is to run concurrrently over multiple control nodes
+
+By default ansible will parallelise out and run concurrently over multiple managed nodes 
+
+```
+[vagrant@cent7ansi vagrant]$ cat second-playbook-demo-parallel.yml
+---
+  - name: "Display content of file root_cronjob_monitoring_sysstat.txt"
+    hosts: loopbacktest
+    tasks:
+    - name: sleep test (parallel and serial)
+      pause: seconds=3
+
+[vagrant@cent7ansi vagrant]$ time ansible-playbook second-playbook-demo-parallel.yml -i inventory.ini
+
+PLAY [Display content of file root_cronjob_monitoring_sysstat.txt] ************************************************************************************************************
+
+TASK [Gathering Facts] ********************************************************************************************************************************************************
+ok: [loopback1]
+ok: [loopback4]
+ok: [loopback2]
+ok: [loopback3]
+
+TASK [sleep test (parallel and serial)] ***************************************************************************************************************************************
+Pausing for 3 seconds
+(ctrl+C then 'C' = continue early, ctrl+C then 'A' = abort)
+ok: [loopback1]
+
+PLAY RECAP ********************************************************************************************************************************************************************
+loopback1                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+loopback2                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+loopback3                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+loopback4                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+
+real	0m6.451s
+user	0m2.301s
+sys	0m0.793s
+```
+
+#### fork parameter to control the degree of concurrency 
+the degree of concurrency can be controlled by the fork -f flag, although in my demo this didn't working as I expected
+```
+[vagrant@cent7ansi vagrant]$ time ansible-playbook second-playbook-demo-parallel.yml -i inventory.ini -f 2
+
+PLAY [Display content of file root_cronjob_monitoring_sysstat.txt] ************************************************************************************************************
+
+TASK [Gathering Facts] ********************************************************************************************************************************************************
+ok: [loopback2]
+ok: [loopback1]
+ok: [loopback4]
+ok: [loopback3]
+
+TASK [sleep test (parallel and serial)] ***************************************************************************************************************************************
+Pausing for 3 seconds
+(ctrl+C then 'C' = continue early, ctrl+C then 'A' = abort)
+ok: [loopback1]
+
+PLAY RECAP ********************************************************************************************************************************************************************
+loopback1                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+loopback2                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+loopback3                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+loopback4                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+
+real	0m7.173s
+user	0m2.299s
+sys	0m0.755s
+[vagrant@cent7ansi vagrant]$ time ansible-playbook second-playbook-demo-parallel.yml -i inventory.ini -f 1
+
+PLAY [Display content of file root_cronjob_monitoring_sysstat.txt] ************************************************************************************************************
+
+TASK [Gathering Facts] ********************************************************************************************************************************************************
+ok: [loopback1]
+ok: [loopback2]
+ok: [loopback3]
+ok: [loopback4]
+
+TASK [sleep test (parallel and serial)] ***************************************************************************************************************************************
+Pausing for 3 seconds
+(ctrl+C then 'C' = continue early, ctrl+C then 'A' = abort)
+ok: [loopback1]
+
+PLAY RECAP ********************************************************************************************************************************************************************
+loopback1                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+loopback2                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+loopback3                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+loopback4                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+
+real	0m8.886s
+user	0m2.419s
+sys	0m0.831s
+```
+
+#### adding serial keyword
+```
+[vagrant@cent7ansi vagrant]$ cat second-playbook-demo-serial.yml
+---
+  - name: "Display content of file root_cronjob_monitoring_sysstat.txt"
+    hosts: loopbacktest
+    serial: 1
+    tasks:
+    - name: sleep test (parallel and serial)
+      pause: seconds=3
+```
+now we can see this runs one-by-one 
+```      
+[vagrant@cent7ansi vagrant]$ time ansible-playbook second-playbook-demo-serial.yml -i inventory.ini
+
+PLAY [Display content of file root_cronjob_monitoring_sysstat.txt] ************************************************************************************************************
+
+TASK [Gathering Facts] ********************************************************************************************************************************************************
+ok: [loopback1]
+
+TASK [sleep test (parallel and serial)] ***************************************************************************************************************************************
+Pausing for 3 seconds
+(ctrl+C then 'C' = continue early, ctrl+C then 'A' = abort)
+ok: [loopback1]
+
+PLAY [Display content of file root_cronjob_monitoring_sysstat.txt] ************************************************************************************************************
+
+TASK [Gathering Facts] ********************************************************************************************************************************************************
+ok: [loopback2]
+
+TASK [sleep test (parallel and serial)] ***************************************************************************************************************************************
+Pausing for 3 seconds
+(ctrl+C then 'C' = continue early, ctrl+C then 'A' = abort)
+ok: [loopback2]
+
+PLAY [Display content of file root_cronjob_monitoring_sysstat.txt] ************************************************************************************************************
+
+TASK [Gathering Facts] ********************************************************************************************************************************************************
+ok: [loopback3]
+
+TASK [sleep test (parallel and serial)] ***************************************************************************************************************************************
+Pausing for 3 seconds
+(ctrl+C then 'C' = continue early, ctrl+C then 'A' = abort)
+ok: [loopback3]
+
+PLAY [Display content of file root_cronjob_monitoring_sysstat.txt] ************************************************************************************************************
+
+TASK [Gathering Facts] ********************************************************************************************************************************************************
+ok: [loopback4]
+
+TASK [sleep test (parallel and serial)] ***************************************************************************************************************************************
+Pausing for 3 seconds
+(ctrl+C then 'C' = continue early, ctrl+C then 'A' = abort)
+ok: [loopback4]
+
+PLAY RECAP ********************************************************************************************************************************************************************
+loopback1                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+loopback2                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+loopback3                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+loopback4                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+
+real	0m17.505s
+user	0m4.054s
+sys	0m1.077s
+```
+
 ## Background - setting up ssh access for vagrant user over loopback 
 
 Ref: https://github.com/ansible/ansible/issues/19584 "Failed to connect to the host via ssh: Permission denied (publickey,password)"

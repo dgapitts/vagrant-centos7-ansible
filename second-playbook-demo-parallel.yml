@@ -1,0 +1,7 @@
+---
+  - name: "sleep test (parallel and serial)"
+    hosts: loopbacktest
+    tasks:
+    - name: sleep test
+      pause: seconds=3
+
